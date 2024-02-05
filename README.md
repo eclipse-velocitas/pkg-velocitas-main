@@ -1,1 +1,3 @@
-# pkg-velocitas-main
+# Velocitas Main Package
+
+Contains all standard Velocitas components.

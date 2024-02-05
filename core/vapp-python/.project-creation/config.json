@@ -1,0 +1,22 @@
+{
+    "sdkUri": "https://github.com/eclipse-velocitas/vehicle-app-python-sdk.git",
+    "files": [
+        "sdk_temp/.gitattributes",
+        "sdk_temp/.gitignore",
+        "sdk_temp/.editorconfig",
+        "sdk_temp/.licensechecker.yml",
+        "sdk_temp/.pre-commit-config.yaml",
+        "sdk_temp/LICENSE",
+        "sdk_temp/license_header.txt",
+        "sdk_temp/NOTICE-3RD-PARTY-CONTENT.md",
+        "sdk_temp/NOTICE.md",
+        "sdk_temp/whitelisted-licenses.txt",
+        "templates/.devcontainer/tests/automated_tests/requirements_test.py",
+        "templates/.devcontainer/tests/automated_tests/requirements.txt",
+        "templates/.devcontainer/tests/automated_tests/runtime_test.py",
+        "templates/.vscode/launch.json",
+        "templates/.vscode/tasks.json",
+        "templates/setup.cfg",
+        "templates/requirements.in"
+    ]
+}
