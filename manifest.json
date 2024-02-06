@@ -1,0 +1,26 @@
+{
+    "components": [
+        {
+            "id": "vapp-core-python",
+            "name": "VApp (Python)",
+            "description": "Velocitas VApp written in Python",
+            "type": "core",
+            "programs": [
+                {
+                    "id": "create-project",
+                    "description": "Creates a new VApp python project",
+                    "executable": "python",
+                    "args": [ "core/vapp-python/.project-creation/run.py" ]
+                }
+            ],
+            "variables": [
+                {
+                    "name": "language",
+                    "description": "Programming language of the project.",
+                    "type": "string",
+                    "default": "python"
+                }
+            ]
+        }
+    ]
+}
