@@ -21,8 +21,13 @@ from pathlib import Path
 from typing import Iterable, List
 
 
-def get_project_creation_root() -> Path:
-    return Path(os.path.dirname(__file__))
+def get_project_creation_sdk_temp() -> Path:
+    return os.path.join(Path(os.path.dirname(__file__)), "sdk_temp")
+
+
+def clean_up_sdk_temp() -> None:
+    if os.path.exists(get_project_creation_sdk_temp()):
+        shutil.rmtree(get_project_creation_sdk_temp())
 
 
 def verbose_copy(src, dst) -> object:
@@ -32,9 +37,26 @@ def verbose_copy(src, dst) -> object:
 
 def clone_sdk(sdk_temp_dir: str) -> None:
     with open(f"{os.path.dirname(__file__)}/config.json") as f:
-        repo_url = json.load(f)["sdkUri"]
+        config = json.load(f)
+        repo_url = config["sdkUri"]
+        repo_version = config["sdkVersion"]
         try:
-            subprocess.check_call(["git", "clone", repo_url, sdk_temp_dir, "--quiet"])
+            clean_up_sdk_temp()
+            subprocess.check_call(
+                [
+                    "git",
+                    "-c",
+                    "advice.detachedHead=false",
+                    "clone",
+                    "--quiet",
+                    "--depth",
+                    "1",
+                    "--branch",
+                    repo_version,
+                    repo_url,
+                    sdk_temp_dir,
+                ]
+            )
             print(f"SDK cloned successfully!")
         except subprocess.CalledProcessError as e:
             print(f"Error cloning repository: {e}")
@@ -45,19 +67,14 @@ def copy_files(root_destination: str) -> None:
         files = json.load(f)["files"]
         for file in files:
             destination = root_destination
-            if "templates" in file:
+            if ".project-creation/templates" in file:
                 destination = os.path.join(
                     root_destination,
-                    os.path.dirname(file.removeprefix("templates/")),
-                )
-            elif "sdk_temp" in file:
-                destination = os.path.join(
-                    root_destination,
-                    os.path.dirname(file.removeprefix("sdk_temp/")),
+                    os.path.dirname(file.removeprefix(".project-creation/templates/")),
                 )
 
             Path(destination).mkdir(parents=True, exist_ok=True)
-            source = f"{get_project_creation_root()}/{file}"
+            source = f"{get_project_creation_sdk_temp()}/{file}"
             verbose_copy(source, destination)
 
 
@@ -91,12 +108,12 @@ def replace_app_name(creation_name: str, destination_repo: str) -> None:
     for root, dirs, files in os.walk(app_path):
         for file in files:
             file_path = os.path.join(root, file)
-            with open(file_path, 'r') as f:
+            with open(file_path, "r") as f:
                 content = f.read()
 
             modified_content = content.replace("AppName", creation_name)
 
-            with open(file_path, 'w') as f:
+            with open(file_path, "w") as f:
                 f.write(modified_content)
     print(f"Replaced 'AppName' with '{creation_name}' in all files.")
 
@@ -141,17 +158,18 @@ def main():
         help="Copy the given example to the new repo.",
     )
     args = parser.parse_args()
-    sdk_temp_dir = os.path.join(get_project_creation_root(), "sdk_temp")
 
-    clone_sdk(sdk_temp_dir)
+    clone_sdk(get_project_creation_sdk_temp())
 
     copy_files(args.destination)
 
-    examples_directory_path = os.path.join(sdk_temp_dir, "examples")
+    examples_directory_path = os.path.join(get_project_creation_sdk_temp(), "examples")
     example_app = (
         os.path.join(examples_directory_path, args.example)
         if args.example
-        else os.path.join(get_project_creation_root(), ".skeleton")
+        else os.path.join(
+            get_project_creation_sdk_temp(), ".project-creation", ".skeleton"
+        )
     )
 
     copy_project(example_app, args.destination)
@@ -162,7 +180,7 @@ def main():
 
     compile_requirements(args.destination)
 
-    shutil.rmtree(sdk_temp_dir)
+    shutil.rmtree(get_project_creation_sdk_temp())
 
 
 if __name__ == "__main__":
