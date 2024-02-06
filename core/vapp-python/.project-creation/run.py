@@ -20,8 +20,10 @@ import subprocess  # nosec B404
 from pathlib import Path
 from typing import Iterable, List
 
+PROJECT_CREATION_TEMPLATE_PATH_PREFIX = ".project-creation/templates/"
 
-def get_project_creation_sdk_temp() -> Path:
+
+def get_project_creation_sdk_temp() -> str:
     return os.path.join(Path(os.path.dirname(__file__)), "sdk_temp")
 
 
@@ -35,47 +37,56 @@ def verbose_copy(src, dst) -> object:
     return shutil.copy2(src, dst)
 
 
-def clone_sdk(sdk_temp_dir: str) -> None:
+def read_creation_config() -> dict:
     with open(f"{os.path.dirname(__file__)}/config.json") as f:
         config = json.load(f)
-        repo_url = config["sdkUri"]
-        repo_version = config["sdkVersion"]
-        try:
-            clean_up_sdk_temp()
-            subprocess.check_call(
-                [
-                    "git",
-                    "-c",
-                    "advice.detachedHead=false",
-                    "clone",
-                    "--quiet",
-                    "--depth",
-                    "1",
-                    "--branch",
-                    repo_version,
-                    repo_url,
-                    sdk_temp_dir,
-                ]
+        return config
+
+
+def _invoke_git_shallow_clone_branch(sdk_url: str, sdk_version: str, sdk_temp_dir: str):
+    subprocess.check_call(
+        [
+            "git",
+            "-c",
+            "advice.detachedHead=false",
+            "clone",
+            "--quiet",
+            "--depth",
+            "1",
+            "--branch",
+            sdk_version,
+            sdk_url,
+            sdk_temp_dir,
+        ]
+    )
+
+
+def clone_sdk(sdk_url: str, sdk_version: str, sdk_temp_dir: str) -> None:
+    try:
+        clean_up_sdk_temp()
+        _invoke_git_shallow_clone_branch(
+            sdk_url,
+            sdk_version,
+            sdk_temp_dir,
+        )
+        print(f"SDK cloned successfully!")
+    except subprocess.CalledProcessError as e:
+        print(f"Error cloning repository: {e}")
+
+
+def copy_files(creation_files: list, root_destination: str) -> None:
+    for file in creation_files:
+        destination = root_destination
+        if PROJECT_CREATION_TEMPLATE_PATH_PREFIX in file:
+            destination = os.path.join(
+                root_destination,
+                os.path.dirname(
+                    file.removeprefix(PROJECT_CREATION_TEMPLATE_PATH_PREFIX)
+                ),
             )
-            print(f"SDK cloned successfully!")
-        except subprocess.CalledProcessError as e:
-            print(f"Error cloning repository: {e}")
-
-
-def copy_files(root_destination: str) -> None:
-    with open(f"{os.path.dirname(__file__)}/config.json") as f:
-        files = json.load(f)["files"]
-        for file in files:
-            destination = root_destination
-            if ".project-creation/templates" in file:
-                destination = os.path.join(
-                    root_destination,
-                    os.path.dirname(file.removeprefix(".project-creation/templates/")),
-                )
-
-            Path(destination).mkdir(parents=True, exist_ok=True)
-            source = f"{get_project_creation_sdk_temp()}/{file}"
-            verbose_copy(source, destination)
+        Path(destination).mkdir(parents=True, exist_ok=True)
+        source = f"{get_project_creation_sdk_temp()}/{file}"
+        verbose_copy(source, destination)
 
 
 def _filter_hidden_files(_: str, dir_contents: List[str]) -> Iterable[str]:
@@ -158,10 +169,15 @@ def main():
         help="Copy the given example to the new repo.",
     )
     args = parser.parse_args()
+    creation_config = read_creation_config()
 
-    clone_sdk(get_project_creation_sdk_temp())
+    clone_sdk(
+        creation_config["sdkUri"],
+        creation_config["sdkVersion"],
+        get_project_creation_sdk_temp(),
+    )
 
-    copy_files(args.destination)
+    copy_files(creation_config["files"], args.destination)
 
     examples_directory_path = os.path.join(get_project_creation_sdk_temp(), "examples")
     example_app = (
