@@ -15,6 +15,7 @@
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess  # nosec B404
 from pathlib import Path
@@ -113,7 +114,11 @@ def copy_project(source_path: str, destination_repo: str) -> None:
         shutil.move(readme_path, destination_repo, copy_function=verbose_copy)
 
 
+def sanitize_name(name: str) -> str:
+    return re.sub(r'[^a-zA-Z0-9_]', '', name)
+
 def replace_app_name(creation_name: str, destination_repo: str) -> None:
+    creation_name = sanitize_name(creation_name)
     app_path = os.path.join(destination_repo, "app")
 
     for root, dirs, files in os.walk(app_path):
