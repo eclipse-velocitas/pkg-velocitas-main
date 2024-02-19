@@ -51,12 +51,12 @@ jobs:
           if [ "${{ matrix.example }}" != "no-example" ]; then
             CREATE_ARGS="-e ${{ matrix.example }}"
           fi
-          python3 ./core/vapp-python/.project-creation/run.py -d "./app" $CREATE_ARGS
+          python3 ./components/cores/vapp-python/.project-creation/run.py -d "./app" $CREATE_ARGS
 
       - name: Install dependencies
         shell: bash
         run: |
-          pip install -r ./core/vapp-python/.project-creation/test/requirements.txt
+          pip install -r ./components/cores/vapp-python/.project-creation/test/requirements.txt
 
       - name: Run verification on generated project
         shell: bash
@@ -66,7 +66,7 @@ jobs:
           # debug print contents
           ls -al $VELOCITAS_APP_ROOT
 
-          pytest --ignore-glob=**/.devcontainer/* --ignore-glob=**/.skeleton/* ./core/vapp-python/.project-creation
+          pytest --ignore-glob=**/.devcontainer/* --ignore-glob=**/.skeleton/* ./components/cores/vapp-python/.project-creation
 
       - name: Upload logs
         uses: actions/upload-artifact@v3
