@@ -10,7 +10,9 @@
                     "id": "create-project",
                     "description": "Creates a new VApp python project",
                     "executable": "python",
-                    "args": [ "core/vapp-python/.project-creation/run.py" ]
+                    "args": [
+                        "components/cores/vapp-python/.project-creation/run.py"
+                    ]
                 }
             ],
             "variables": [
