@@ -21,8 +21,16 @@
                     "description": "Programming language of the project.",
                     "type": "string",
                     "scope": "project",
-                    "constant": "true",
+                    "constant": true,
                     "default": "python"
+                },
+                {
+                    "name": "repoType",
+                    "description": "The type of the project.",
+                    "type": "string",
+                    "scope": "project",
+                    "constant": true,
+                    "default": "app"
                 }
             ]
         }
