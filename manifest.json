@@ -20,6 +20,8 @@
                     "name": "language",
                     "description": "Programming language of the project.",
                     "type": "string",
+                    "scope": "project",
+                    "constant": "true",
                     "default": "python"
                 }
             ]
