@@ -1,6 +1,6 @@
 {
     "sdkUri": "https://github.com/eclipse-velocitas/vehicle-app-python-sdk.git",
-    "sdkVersion": "v0.14.0",
+    "sdkVersion": "v0.14.1",
     "files": [
         ".gitattributes",
         ".gitignore",
