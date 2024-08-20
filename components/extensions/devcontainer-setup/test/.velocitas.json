@@ -3,7 +3,7 @@
         "package_under_test": "@main"
     },
     "components": [
-        "pantaris-integration"
+        "devcontainer-setup"
     ],
     "variables": {
         "language": "$language$",

@@ -3,7 +3,7 @@
         "package_under_test": "@main"
     },
     "components": [
-        "pantaris-integration"
+        "github-workflows"
     ],
     "variables": {
         "language": "$language$",

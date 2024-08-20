@@ -3,7 +3,7 @@
         "package_under_test": "@main"
     },
     "components": [
-        "pantaris-integration"
+        "grpc-interface-support"
     ],
     "variables": {
         "language": "$language$",

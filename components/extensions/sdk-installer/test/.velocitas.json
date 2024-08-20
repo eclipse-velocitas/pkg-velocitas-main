@@ -3,7 +3,7 @@
         "package_under_test": "@main"
     },
     "components": [
-        "pantaris-integration"
+        "sdk-installer"
     ],
     "variables": {
         "language": "$language$",

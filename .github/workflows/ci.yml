@@ -29,7 +29,7 @@ on:
 
 jobs:
   unit-test:
-    name: "Run unit tests"
+    name: Run unit tests
     runs-on: ubuntu-22.04
     container: ghcr.io/eclipse-velocitas/devcontainer-base-images/python:v0.3
     strategy:
@@ -149,7 +149,7 @@ jobs:
 
       - name: Replace project config
         run: |
-          cp -f ${{ env.packageInstallPath }}/components/extensions/${{ matrix.component }}/test/.velocitas.json .
+          cat ${{ env.packageInstallPath }}/components/extensions/${{ matrix.component }}/test/.velocitas.json | sed -e 's/$language$/${{ matrix.language }}/g' > .velocitas.json
 
       - name: Run devContainer
         uses: devcontainers/ci@v0.3
@@ -164,6 +164,18 @@ jobs:
             export VELOCITAS_COMPONENT_PATH=${VELOCITAS_PACKAGE_REPO_PATH}/components/extensions/${{ matrix.component }}
 
             cd $VELOCITAS_PACKAGE_REPO_PATH
-            python -m pip install -r ./components/extensions/${{ matrix.component }}/test/requirements.txt
-            python -m pip install -r ./components/extensions/${{ matrix.component }}/requirements.txt
-            pytest -s ./components/extensions/${{ matrix.component }}/test/integration
+
+            REQUIREMENTS_TEST=components/extensions/${{ matrix.component }}/test/requirements.txt
+            if [ -e "${REQUIREMENTS_TEST}" ]; then
+              python -m pip install -r ./components/extensions/${{ matrix.component }}/test/requirements.txt
+            fi
+
+            REQUIREMENTS=components/extensions/${{ matrix.component }}/requirements.txt
+            if [ -e "${REQUIREMENTS}" ]; then
+              python -m pip install -r ./components/extensions/${{ matrix.component }}/requirements.txt
+            fi
+
+            TESTS=./components/extensions/${{ matrix.component }}/test/integration
+            if [ -e "${TESTS}" ]; then
+              pytest -s ./components/extensions/${{ matrix.component }}/test/integration
+            fi
