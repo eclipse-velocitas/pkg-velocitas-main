@@ -1,0 +1,7 @@
+pytest
+pytest-ordering
+pytest-asyncio
+pytest-cov
+pyfakefs
+types-mock
+velocitas-sdk==0.14.1

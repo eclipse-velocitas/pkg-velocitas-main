@@ -1,0 +1,29 @@
+{
+    "container_name": "databroker",
+    "image": {
+        "name": "ghcr.io/eclipse-kuksa/kuksa-databroker:0.4.4"
+    },
+    "mount_points": [
+        {
+            "destination": "vspec.json",
+            "source": "",
+            "propagation_mode": "rprivate"
+        }
+    ],
+    "host_config": {
+        "devices": [],
+        "network_mode": "host",
+        "privileged": false,
+        "restart_policy": {
+            "maximum_retry_count": 0,
+            "retry_timeout": 0,
+            "type": "unless-stopped"
+        }
+    },
+    "config": {
+        "env": [
+            "KUKSA_DATABROKER_PORT=55555",
+            "KUKSA_DATABROKER_METADATA_FILE=vspec.json"
+        ]
+    }
+}

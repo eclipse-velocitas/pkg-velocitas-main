@@ -1,0 +1,13 @@
+{
+    "packages": {
+        "package_under_test": "@main"
+    },
+    "variables": {
+        "language": "python",
+        "repoType": "app",
+        "appManifestPath": "app/AppManifest.json",
+        "githubRepoId": "eclipse-velocitas/vehicle-app-python-template",
+        "generatedModelPath": "./gen/vehicle_model"
+    },
+    "cliVersion": "v0.12.0"
+}

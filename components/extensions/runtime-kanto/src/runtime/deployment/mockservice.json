@@ -1,0 +1,28 @@
+{
+    "container_name": "mockservice",
+    "image": {
+        "name": "ghcr.io/eclipse-kuksa/kuksa-mock-provider/mock-provider:0.4.0"
+    },
+    "mount_points": [
+        {
+            "destination": "/mock/mock.py",
+            "source": "",
+            "propagation_mode": "rprivate"
+        }
+    ],
+    "host_config": {
+        "devices": [],
+        "network_mode": "host",
+        "privileged": false,
+        "restart_policy": {
+            "maximum_retry_count": 0,
+            "retry_timeout": 0,
+            "type": "unless-stopped"
+        }
+    },
+    "config": {
+        "env": [
+            "VDB_ADDRESS=127.0.0.1:55555"
+        ]
+    }
+}

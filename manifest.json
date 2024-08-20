@@ -1,36 +1,639 @@
 {
     "components": [
         {
-            "id": "vapp-core-python",
-            "name": "VApp (Python)",
-            "description": "Velocitas VApp written in Python",
-            "type": "core",
+            "id": "devcontainer-setup",
+            "basePath": "components/extensions/devcontainer-setup",
+            "files": [
+                {
+                    "src": "src/common",
+                    "dst": ".devcontainer"
+                },
+                {
+                    "src": "src/${{ language }}/common",
+                    "dst": ".devcontainer"
+                },
+                {
+                    "src": "src/${{ language }}/${{ repoType }}",
+                    "dst": ".devcontainer"
+                }
+            ],
+            "variables": [
+                {
+                    "name": "repoType",
+                    "type": "string",
+                    "required": true,
+                    "description": "The type of the repository: 'app' or 'sdk'"
+                },
+                {
+                    "name": "appManifestPath",
+                    "type": "string",
+                    "required": true,
+                    "description": "Path of the AppManifest file, relative to the .velocitas.json"
+                },
+                {
+                    "name": "devContainerBaseImageUri",
+                    "type": "string",
+                    "default": "ghcr.io/eclipse-velocitas/devcontainer-base-images/${{ language }}:v0.3",
+                    "description": "The URI of the devContainer base image to use."
+                },
+                {
+                    "name": "language",
+                    "type": "string",
+                    "required": true,
+                    "description": "The programming language of the project. Either 'python' or 'cpp'"
+                }
+            ]
+        },
+        {
+            "id": "vehicle-signal-interface",
+            "basePath": "components/extensions/vehicle-signal-interface",
+            "onPostInit": [
+                {
+                    "ref": "install-deps"
+                },
+                {
+                    "ref": "download-vspec"
+                },
+                {
+                    "ref": "generate-model"
+                }
+            ],
             "programs": [
                 {
-                    "id": "create-project",
-                    "description": "Creates a new VApp python project",
+                    "id": "install-deps",
                     "executable": "python",
                     "args": [
-                        "components/cores/vapp-python/.project-creation/run.py"
+                        "./src/install_deps.py"
+                    ]
+                },
+                {
+                    "id": "download-vspec",
+                    "executable": "python",
+                    "args": [
+                        "./src/download_vspec.py"
+                    ]
+                },
+                {
+                    "id": "generate-model",
+                    "executable": "python",
+                    "args": [
+                        "./src/generate_model.py"
+                    ]
+                }
+            ],
+            "variables": [
+                {
+                    "name": "generatedModelPath",
+                    "type": "string",
+                    "default": "auto",
+                    "description": "Absolute path where to generate the vehicle model. If set to 'auto' the model will be generated in the project cache."
+                },
+                {
+                    "name": "vssSrc",
+                    "type": "string",
+                    "default": "https://github.com/COVESA/vehicle_signal_specification/releases/download/v4.0/vss_rel_4.0.json",
+                    "description": "This defines the source of the VSS file that should be used for model generation."
+                },
+                {
+                    "name": "vssUnitSrc",
+                    "type": "array",
+                    "default": [
+                        "./vehicle-model-lifecycle/units.yaml"
+                    ],
+                    "description": "This defines the source of the units file that should be used for model generation."
+                }
+            ]
+        },
+        {
+            "id": "conan-setup",
+            "basePath": "components/extensions/conan-setup",
+            "onPostInit": [
+                {
+                    "ref": "run"
+                }
+            ],
+            "programs": [
+                {
+                    "id": "run",
+                    "executable": "python3",
+                    "args": [
+                        "./src/run.py"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "sdk-installer",
+            "basePath": "components/extensions/sdk-installer",
+            "onPostInit": [
+                {
+                    "ref": "install-deps"
+                },
+                {
+                    "ref": "run"
+                }
+            ],
+            "programs": [
+                {
+                    "id": "install-deps",
+                    "executable": "python",
+                    "args": [
+                        "-m",
+                        "pip",
+                        "install",
+                        "-r",
+                        "./requirements.txt"
+                    ]
+                },
+                {
+                    "id": "run",
+                    "executable": "python",
+                    "args": [
+                        "./src/run.py"
+                    ]
+                }
+            ],
+            "variables": [
+                {
+                    "name": "gitLocation",
+                    "type": "string",
+                    "default": "https://github.com/eclipse-velocitas",
+                    "description": "Git location of used repositories"
+                },
+                {
+                    "name": "language",
+                    "type": "string",
+                    "required": true,
+                    "description": "The programming language of the project. Either 'python' or 'cpp'"
+                },
+                {
+                    "name": "sdkGitRepo",
+                    "type": "string",
+                    "default": "${{ gitLocation }}/vehicle-app-${{ language }}-sdk.git",
+                    "description": "Git repository to use for downloading the SDK"
+                },
+                {
+                    "name": "sdkPackageSubdirectory",
+                    "type": "string",
+                    "default": ".",
+                    "description": "Subdirectory within the git repository of the SDK which contains the package to install"
+                },
+                {
+                    "name": "sdkGitRef",
+                    "type": "string",
+                    "default": "auto",
+                    "description": "Git reference (branch or tag) for the SDK repository to use. If set to 'auto', it will use the version identifier from the dependency file."
+                },
+                {
+                    "name": "additionalPackages",
+                    "type": "string",
+                    "default": "[]",
+                    "description": "String-escaped JSON array of additional packages to install along with the SDK. Objects inside the array require the following fields: 'id' - package id, 'gitRepo' - URI of the git repo, 'gitRef' - git reference of the git repo to use, 'packageSubdirectory' - directory within the repo which hosts the package definition"
+                }
+            ]
+        },
+        {
+            "id": "grpc-interface-support",
+            "basePath": "components/extensions/grpc-interface-support",
+            "onPostInit": [
+                {
+                    "ref": "install-deps"
+                },
+                {
+                    "ref": "generate-sdk"
+                }
+            ],
+            "programs": [
+                {
+                    "id": "install-deps",
+                    "executable": "python",
+                    "args": [
+                        "-m",
+                        "pip",
+                        "install",
+                        "-r",
+                        "./requirements.txt"
+                    ]
+                },
+                {
+                    "id": "generate-sdk",
+                    "description": "Generates service client SDKs to be used in business logic.",
+                    "executable": "python",
+                    "args": [
+                        "./src/main.py"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "build-system",
+            "basePath": "components/extensions/build-system",
+            "files": [
+                {
+                    "src": "./cpp-cmake-conan/src",
+                    "dst": ".",
+                    "condition": "'${{ language }}' === 'cpp'"
+                }
+            ],
+            "programs": [
+                {
+                    "id": "install",
+                    "description": "Installs all necessary dependencies / packages for the application",
+                    "executable": "python",
+                    "args": [
+                        "./cpp-cmake-conan/src/install_deps.py"
+                    ]
+                },
+                {
+                    "id": "build",
+                    "description": "Builds the application",
+                    "executable": "python",
+                    "args": [
+                        "./cpp-cmake-conan/src/build.py"
                     ]
                 }
             ],
             "variables": [
                 {
                     "name": "language",
-                    "description": "Programming language of the project.",
                     "type": "string",
-                    "scope": "project",
-                    "constant": true,
-                    "default": "python"
+                    "required": true,
+                    "description": "The programming language of the project. Either 'python' or 'cpp'"
+                }
+            ]
+        },
+        {
+            "id": "runtime-local",
+            "basePath": "components/extensions/runtime-local",
+            "onPostInit": [
+                {
+                    "ref": "install-deps"
+                }
+            ],
+            "programs": [
+                {
+                    "id": "run-vehicledatabroker-cli",
+                    "executable": "python3",
+                    "args": [
+                        "./src/run-vehicledatabroker-cli.py"
+                    ],
+                    "interactive": true
+                },
+                {
+                    "id": "run-service",
+                    "executable": "python3",
+                    "args": [
+                        "./src/run_service.py"
+                    ]
+                },
+                {
+                    "id": "up",
+                    "executable": "python3",
+                    "args": [
+                        "./src/runtime-up.py"
+                    ]
+                },
+                {
+                    "id": "down",
+                    "executable": "python3",
+                    "args": [
+                        "./src/runtime-down.py"
+                    ]
+                },
+                {
+                    "id": "install-deps",
+                    "executable": "python3",
+                    "args": [
+                        "-m",
+                        "pip",
+                        "install",
+                        "-r",
+                        "./src/requirements.txt"
+                    ]
+                },
+                {
+                    "id": "run-vehicle-app",
+                    "executable": "python3",
+                    "args": [
+                        "./src/run-vehicle-app.py"
+                    ]
+                }
+            ],
+            "variables": [
+                {
+                    "name": "runtimeFilePath",
+                    "type": "string",
+                    "description": "Path to the file describing your custom runtime configuration.",
+                    "default": "runtime.json"
+                },
+                {
+                    "name": "mockFilePath",
+                    "type": "string",
+                    "description": "Path to the mocking configuration for the mock service",
+                    "default": "mock.py"
+                },
+                {
+                    "name": "mqttBrokerImage",
+                    "type": "string",
+                    "description": "Docker image for mqtt broker",
+                    "default": "eclipse-mosquitto:2.0.14"
+                },
+                {
+                    "name": "vehicleDatabrokerImage",
+                    "type": "string",
+                    "description": "Docker image for vehicle databroker",
+                    "default": "ghcr.io/eclipse-kuksa/kuksa-databroker:0.4.4"
+                },
+                {
+                    "name": "vehicleDatabrokerCliImage",
+                    "type": "string",
+                    "description": "Docker image for vehicle databroker CLI",
+                    "default": "ghcr.io/eclipse-kuksa/kuksa-databroker-cli:0.4.4"
+                },
+                {
+                    "name": "seatServiceImage",
+                    "type": "string",
+                    "description": "Docker image for seat service",
+                    "default": "ghcr.io/eclipse-kuksa/kuksa-incubation/seat_service:0.4.0"
+                },
+                {
+                    "name": "feederCanImage",
+                    "type": "string",
+                    "description": "Docker image for feeder can",
+                    "default": "ghcr.io/eclipse-kuksa/kuksa-can-provider/can-provider:0.4.2"
+                },
+                {
+                    "name": "mockServiceImage",
+                    "type": "string",
+                    "description": "Docker image for mock service",
+                    "default": "ghcr.io/eclipse-kuksa/kuksa-mock-provider/mock-provider:0.4.0"
+                }
+            ]
+        },
+        {
+            "id": "runtime-kanto",
+            "basePath": "components/extensions/runtime-kanto",
+            "onPostInit": [
+                {
+                    "ref": "install-deps"
+                }
+            ],
+            "programs": [
+                {
+                    "id": "install-deps",
+                    "executable": "python3",
+                    "args": [
+                        "-m",
+                        "pip",
+                        "install",
+                        "-r",
+                        "./src/requirements.txt"
+                    ]
+                },
+                {
+                    "id": "up",
+                    "executable": "python3",
+                    "args": [
+                        "./src/runtime/runtime_up.py"
+                    ]
+                },
+                {
+                    "id": "down",
+                    "executable": "python3",
+                    "args": [
+                        "./src/runtime/runtime_down.py"
+                    ]
+                }
+            ],
+            "variables": [
+                {
+                    "name": "runtimeFilePath",
+                    "type": "string",
+                    "description": "Path to the file describing your custom runtime configuration.",
+                    "default": "runtime.json"
+                },
+                {
+                    "name": "mockFilePath",
+                    "type": "string",
+                    "description": "Path to the mocking configuration for the mock service",
+                    "default": "mock.py"
+                },
+                {
+                    "name": "mqttBrokerImage",
+                    "type": "string",
+                    "description": "Docker image for mqtt broker",
+                    "default": "registry.hub.docker.com/library/eclipse-mosquitto:2.0.14"
+                },
+                {
+                    "name": "vehicleDatabrokerImage",
+                    "type": "string",
+                    "description": "Docker image for vehicle databroker",
+                    "default": "ghcr.io/eclipse-kuksa/kuksa-databroker:0.4.4"
+                },
+                {
+                    "name": "seatServiceImage",
+                    "type": "string",
+                    "description": "Docker image for seat service",
+                    "default": "ghcr.io/eclipse-kuksa/kuksa-incubation/seat_service:0.4.0"
+                },
+                {
+                    "name": "feederCanImage",
+                    "type": "string",
+                    "description": "Docker image for feeder can",
+                    "default": "ghcr.io/eclipse-kuksa/kuksa-can-provider/can-provider:0.4.2"
+                },
+                {
+                    "name": "mockServiceImage",
+                    "type": "string",
+                    "description": "Docker image for mock service",
+                    "default": "ghcr.io/eclipse-kuksa/kuksa-mock-provider/mock-provider:0.4.0"
+                }
+            ]
+        },
+        {
+            "id": "deployment-kanto",
+            "basePath": "components/extensions/runtime-kanto",
+            "programs": [
+                {
+                    "id": "build-vehicleapp",
+                    "executable": "python3",
+                    "args": [
+                        "./src/app_deployment/build_vehicleapp.py"
+                    ]
+                },
+                {
+                    "id": "deploy-vehicleapp",
+                    "executable": "python3",
+                    "args": [
+                        "./src/app_deployment/deploy_vehicleapp.py"
+                    ]
+                }
+            ],
+            "variables": [
+                {
+                    "name": "dockerfilePath",
+                    "type": "string",
+                    "description": "Path of Dockerfile to use",
+                    "default": "./app/Dockerfile"
+                },
+                {
+                    "name": "runtimeFilePath",
+                    "type": "string",
+                    "description": "Path to the file describing your custom runtime configuration.",
+                    "default": "runtime.json"
+                },
+                {
+                    "name": "mockFilePath",
+                    "type": "string",
+                    "description": "Path to the mocking configuration for the mock service",
+                    "default": "mock.py"
+                },
+                {
+                    "name": "mqttBrokerImage",
+                    "type": "string",
+                    "description": "Docker image for mqtt broker",
+                    "default": "registry.hub.docker.com/library/eclipse-mosquitto:2.0.14"
+                },
+                {
+                    "name": "vehicleDatabrokerImage",
+                    "type": "string",
+                    "description": "Docker image for vehicle databroker",
+                    "default": "ghcr.io/eclipse-kuksa/kuksa-databroker:0.4.4"
+                },
+                {
+                    "name": "seatServiceImage",
+                    "type": "string",
+                    "description": "Docker image for seat service",
+                    "default": "ghcr.io/eclipse-kuksa/kuksa-incubation/seat_service:0.4.0"
+                },
+                {
+                    "name": "feederCanImage",
+                    "type": "string",
+                    "description": "Docker image for feeder can",
+                    "default": "ghcr.io/eclipse-kuksa/kuksa-can-provider/can-provider:0.4.2"
+                },
+                {
+                    "name": "mockServiceImage",
+                    "type": "string",
+                    "description": "Docker image for mock service",
+                    "default": "ghcr.io/eclipse-kuksa/kuksa-mock-provider/mock-provider:0.4.0"
+                }
+            ]
+        },
+        {
+            "id": "pantaris-integration",
+            "basePath": "components/extensions/pantaris-integration",
+            "onPostInit": [
+                {
+                    "ref": "install-deps"
+                }
+            ],
+            "programs": [
+                {
+                    "id": "install-deps",
+                    "executable": "python3",
+                    "args": [
+                        "-m",
+                        "pip",
+                        "install",
+                        "-r",
+                        "./src/requirements.txt"
+                    ]
+                },
+                {
+                    "id": "generate-desired-state",
+                    "executable": "python3",
+                    "args": [
+                        "./src/gen_desired_state.py"
+                    ]
+                }
+            ],
+            "variables": [
+                {
+                    "name": "runtimeFilePath",
+                    "type": "string",
+                    "description": "Path to the file describing your custom runtime configuration.",
+                    "default": "runtime.json"
+                },
+                {
+                    "name": "gitLocation",
+                    "type": "string",
+                    "default": "https://github.com/eclipse-velocitas",
+                    "description": "Git location of used repositories"
+                }
+            ]
+        },
+        {
+            "id": "github-workflows",
+            "basePath": "components/extensions/github-workflows",
+            "files": [
+                {
+                    "src": "src/common",
+                    "dst": ".github"
+                },
+                {
+                    "src": "src/${{ repoType }}",
+                    "dst": ".github"
+                },
+                {
+                    "src": "src/${{ language }}-common",
+                    "dst": ".github"
+                },
+                {
+                    "src": "src/${{ language }}-${{ repoType }}",
+                    "dst": ".github"
+                }
+            ],
+            "variables": [
+                {
+                    "name": "language",
+                    "type": "string",
+                    "description": "The programming language of the project. Either 'python' or 'cpp'"
                 },
                 {
                     "name": "repoType",
-                    "description": "The type of the project.",
                     "type": "string",
-                    "scope": "project",
-                    "constant": true,
-                    "default": "app"
+                    "description": "The type of the repository: 'app' or 'sdk'"
+                },
+                {
+                    "name": "appManifestPath",
+                    "type": "string",
+                    "description": "Path of the AppManifest file, relative to the .velocitas.json"
+                },
+                {
+                    "name": "githubRepoId",
+                    "type": "string",
+                    "description": "The id of the repository, e.g. myOrg/myRepo."
+                },
+                {
+                    "name": "appExecutionPlatforms",
+                    "type": "string",
+                    "description": "Comma separated list of supported app execution platforms.",
+                    "default": "linux/amd64, linux/arm64"
+                }
+            ]
+        },
+        {
+            "id": "github-templates",
+            "basePath": "components/extensions/github-templates",
+            "files": [
+                {
+                    "src": "src/${{ repoType }}",
+                    "dst": ".github"
+                }
+            ],
+            "variables": [
+                {
+                    "name": "githubRepoId",
+                    "type": "string",
+                    "required": true,
+                    "description": "The id of the repository, e.g. myOrg/myRepo."
+                },
+                {
+                    "name": "repoType",
+                    "type": "string",
+                    "required": true,
+                    "description": "The type of the repository: 'app' or 'sdk'"
                 }
             ]
         }

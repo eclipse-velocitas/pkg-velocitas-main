@@ -1,0 +1,102 @@
+[
+    {
+        "uri": "https://github.com/eclipse-velocitas/devenv-devcontainer-setup",
+        "components": [
+            {
+                "name": "devcontainer-setup"
+            },
+            {
+                "name": "vehicle-signal-interface"
+            },
+            {
+                "name": "conan-setup"
+            },
+            {
+                "name": "sdk-installer"
+            },
+            {
+                "name": "grpc-interface-support"
+            },
+            {
+                "name": "build-system"
+            }
+        ],
+        "workflows": [
+            {
+                "from": "ci.yml",
+                "to": "devcontainer-setup.yml"
+            }
+        ]
+    },
+    {
+        "uri": "https://github.com/eclipse-velocitas/devenv-runtimes",
+        "components": [
+            {
+                "name": "runtime-local",
+                "basePath": "runtime_local"
+            },
+            {
+                "name": "runtime-kanto",
+                "basePath": "runtime_kanto"
+            },
+            {
+                "name": "deployment-kanto",
+                "basePath": "runtime_kanto",
+                "noCopy": true,
+                "newBasePath": "components/extensions/runtime-kanto"
+            },
+            {
+                "name": "pantaris-integration",
+                "basePath": "desired_state_generator"
+            }
+        ],
+        "workflows": [
+            {
+                "from": "ci.yml",
+                "to": "runtimes.yml"
+            }
+        ],
+        "actions": [
+            {
+                "from": "prepare-int-tests",
+                "to": "prepare-int-tests"
+            }
+        ]
+    },
+    {
+        "uri": "https://github.com/eclipse-velocitas/devenv-github-workflows",
+        "components": [
+            {
+                "name": "github-workflows",
+                "basePath": "."
+            }
+        ],
+        "workflows": [
+            {
+                "from": "ci.yml",
+                "to": "github-workflows.yml"
+            }
+        ],
+        "actions": [
+            {
+                "from": "update-velocitas-json",
+                "to": "update-velocitas-json"
+            }
+        ]
+    },
+    {
+        "uri": "https://github.com/eclipse-velocitas/devenv-github-templates",
+        "components": [
+            {
+                "name": "github-templates",
+                "basePath": "."
+            }
+        ],
+        "workflows": [
+            {
+                "from": "ci.yml",
+                "to": "github-templates.yml"
+            }
+        ]
+    }
+]

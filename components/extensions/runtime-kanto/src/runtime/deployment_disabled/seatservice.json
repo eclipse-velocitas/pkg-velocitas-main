@@ -1,0 +1,23 @@
+{
+    "container_name": "seatservice",
+    "image": {
+        "name": "ghcr.io/eclipse-kuksa/kuksa-incubation/seat_service:0.4.0"
+    },
+    "host_config": {
+        "devices": [],
+        "network_mode": "host",
+        "privileged": false,
+        "restart_policy": {
+            "maximum_retry_count": 0,
+            "retry_timeout": 0,
+            "type": "unless-stopped"
+        }
+    },
+    "config": {
+        "env": [
+            "BROKER_ADDR=127.0.0.1:55555",
+            "RUST_LOG=info",
+            "vehicle_data_broker=info"
+        ]
+    }
+}
