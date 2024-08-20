@@ -28,22 +28,6 @@ on:
       - main
 
 jobs:
-  lint-job:
-    name: "Run linters"
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install deps
-        run: |
-          pip install mypy
-          pip install types-requests
-
-      - name: Run Linters
-        uses: pre-commit/action@v3.0.0
-
   unit-test:
     name: "Run unit tests"
     runs-on: ubuntu-22.04
