@@ -1,0 +1,36 @@
+{
+    "container_name": "feedercan",
+    "image": {
+        "name": "ghcr.io/eclipse-kuksa/kuksa-can-provider/can-provider:0.4.2"
+    },
+    "mount_points": [
+        {
+            "destination": "data",
+            "source": "/workspaces/vehicle-app-python-template/config/feedercan",
+            "propagation_mode": "rprivate"
+        }
+    ],
+    "host_config": {
+        "devices": [],
+        "network_mode": "host",
+        "privileged": false,
+        "restart_policy": {
+            "maximum_retry_count": 0,
+            "retry_timeout": 0,
+            "type": "unless-stopped"
+        }
+    },
+    "config": {
+        "env": [
+            "VDB_ADDRESS=127.0.0.1:55555",
+            "USECASE=databroker",
+            "LOG_LEVEL=info",
+            "databroker=info",
+            "broker_client=info",
+            "dbcfeeder=info",
+            "CANDUMP_FILE=/data/candumpDefault.log",
+            "DBC_FILE=/data/dbcfileDefault.dbc",
+            "MAPPING_FILE=/data/vss_dbc.json"
+        ]
+    }
+}

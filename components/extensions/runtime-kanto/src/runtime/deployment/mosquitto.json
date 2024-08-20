@@ -1,0 +1,23 @@
+{
+    "container_name": "mosquitto",
+    "image": {
+        "name": "registry.hub.docker.com/library/eclipse-mosquitto:2.0.14"
+    },
+    "host_config": {
+        "devices": [],
+        "network_mode": "host",
+        "privileged": false,
+        "restart_policy": {
+            "maximum_retry_count": 0,
+            "retry_timeout": 0,
+            "type": "unless-stopped"
+        }
+    },
+    "config": {
+        "cmd": [
+            "mosquitto",
+            "-c",
+            "/mosquitto-no-auth.conf"
+        ]
+    }
+}
