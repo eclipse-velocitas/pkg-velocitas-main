@@ -12,9 +12,9 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-name: CI-devenv-devcontainer-setup
+name: CI
 concurrency:
-  group: ${{ github.ref }}-devenv-devcontainer-setup
+  group: ${{ github.ref }}
   cancel-in-progress: true
 
 on:
@@ -36,11 +36,17 @@ jobs:
       matrix:
         component:
           [
-            "setup",
-            "grpc-interface-support",
-            "vehicle-model-lifecycle",
-            "sdk-installer",
             "build-system/cpp-cmake-conan",
+            "conan-setup",
+            "devcontainer-setup",
+            "github-templates",
+            "github-workflows",
+            "grpc-interface-support",
+            "pantaris-integration",
+            "runtime-kanto",
+            "runtime-local",
+            "sdk-installer",
+            "vehicle-signal-interface"
           ]
       fail-fast: false
 
@@ -50,12 +56,15 @@ jobs:
 
       - name: Install required packages
         run: |
-          if [ -e "${{ matrix.component }}/requirements.txt" ]; then
-            pip install -r ${{ matrix.component }}/requirements.txt
+          REQUIREMENTS=components/extensions/${{ matrix.component }}/requirements.txt
+          REQUIREMENTS_TEST=components/extensions/${{ matrix.component }}/test/requirements.txt
+
+          if [ -e "${REQUIREMENTS}" ]; then
+            pip install -r ${REQUIREMENTS}
           fi
 
-          if [ -e "${{ matrix.component }}/test/requirements.txt" ]; then
-            pip install -r ${{ matrix.component }}/test/requirements.txt
+          if [ -e "${REQUIREMENTS_TEST}" ]; then
+            pip install -r ${REQUIREMENTS_TEST}
           fi
 
       - name: unit test
@@ -66,7 +75,7 @@ jobs:
           --cov . \
           --cov-report=xml:results/CodeCoverage/${{ matrix.component }}/cobertura-coverage.xml \
           --cov-branch \
-          ./${{ matrix.component }}/test/unit
+          components/extensions/${{ matrix.component }}/test/unit
 
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v3
@@ -99,11 +108,17 @@ jobs:
         language: ["python", "cpp"]
         component:
           [
-            "setup",
-            "grpc-interface-support",
-            "vehicle-model-lifecycle",
-            "sdk-installer",
             "build-system/cpp-cmake-conan",
+            "conan-setup",
+            "devcontainer-setup",
+            "github-templates",
+            "github-workflows",
+            "grpc-interface-support",
+            "pantaris-integration",
+            "runtime-kanto",
+            "runtime-local",
+            "sdk-installer",
+            "vehicle-signal-interface"
           ]
       fail-fast: false
 
@@ -131,7 +146,7 @@ jobs:
       - name: Run devContainer
         uses: devcontainers/ci@v0.3
         with:
-          env: VELOCITAS_HOME=/workspaces/devenv-devcontainer-setup
+          env: VELOCITAS_HOME=/workspaces/pkg-velocitas-main
           runCmd: |
             CWD=$(pwd)
 
@@ -141,6 +156,6 @@ jobs:
             export VELOCITAS_COMPONENT_PATH=${VELOCITAS_PACKAGE_REPO_PATH}/${{ matrix.component }}
 
             cd $VELOCITAS_PACKAGE_REPO_PATH
-            python -m pip install -r ./${{ matrix.component }}/test/requirements.txt
-            python -m pip install -r ./${{ matrix.component }}/requirements.txt
-            pytest -s ./${{ matrix.component }}/test/integration
+            python -m pip install -r ./components/extensions/${{ matrix.component }}/test/requirements.txt
+            python -m pip install -r ./components/extensions/${{ matrix.component }}/requirements.txt
+            pytest -s ./components/extensions/${{ matrix.component }}/test/integration
