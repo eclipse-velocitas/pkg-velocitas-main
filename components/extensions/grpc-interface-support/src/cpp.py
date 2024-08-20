@@ -43,7 +43,7 @@ CONAN_PROFILE_NAME = "host"
 
 def get_template_dir() -> str:
     return os.path.join(
-        get_package_path(), "grpc-interface-support", "data", "templates", "cpp"
+        get_package_path(), "components", "extensions", "grpc-interface-support", "data", "templates", "cpp"
     )
 
 

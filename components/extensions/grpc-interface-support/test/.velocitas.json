@@ -3,13 +3,15 @@
         "package_under_test": "@main"
     },
     "components": [
-        "grpc-interface-support"
+        "grpc-interface-support",
+        "build-system",
+        "sdk-installer"
     ],
     "variables": {
-        "language": "$language$",
+        "language": "$language",
         "repoType": "app",
         "appManifestPath": "app/AppManifest.json",
-        "githubRepoId": "eclipse-velocitas/vehicle-app-$language$-template",
+        "githubRepoId": "eclipse-velocitas/vehicle-app-$language-template",
         "appExecutionPlatforms": "linux/amd64",
         "generatedModelPath": "./app/vehicle_model"
     },

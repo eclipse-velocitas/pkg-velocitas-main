@@ -149,7 +149,7 @@ jobs:
 
       - name: Replace project config
         run: |
-          cat ${{ env.packageInstallPath }}/components/extensions/${{ matrix.component }}/test/.velocitas.json | sed -e 's/$language$/${{ matrix.language }}/g' > .velocitas.json
+          cat ${{ env.packageInstallPath }}/components/extensions/${{ matrix.component }}/test/.velocitas.json | sed -e 's/$language/${{ matrix.language }}/g' > .velocitas.json
           cat .velocitas.json
 
       - name: Run devContainer

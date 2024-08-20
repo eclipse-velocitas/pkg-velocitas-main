@@ -46,7 +46,7 @@ def get_required_sdk_version_python() -> str:
 
 def get_template_dir() -> str:
     return os.path.join(
-        get_package_path(), "grpc-interface-support", "data", "templates", "python"
+        get_package_path(), "components", "extensions", "grpc-interface-support", "data", "templates", "python"
     )
 
 
@@ -207,16 +207,8 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
             "core_sdk_version": get_required_sdk_version_python(),
         }
 
-        template_dir = os.path.join(
-            get_package_path(),
-            "grpc-interface-support",
-            "data",
-            "templates",
-            "python",
-        )
-
         copy_templates(
-            template_dir, self.__package_directory_path, files_to_copy, variables
+            get_template_dir(), self.__package_directory_path, files_to_copy, variables
         )
 
     def __create_service_stub_source(self, service_name: str) -> None:
