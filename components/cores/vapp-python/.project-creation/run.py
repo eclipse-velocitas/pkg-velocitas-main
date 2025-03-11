@@ -152,14 +152,15 @@ def compile_requirements(destination_repo: str) -> None:
 
 
 def get_latest_tag(repo_path: str) -> str:
-    """Return the latest tag based on commit date."""
-    command = f"git -C {repo_path} tag --sort=-creatordate"
-    result = subprocess.run(command, shell=True, capture_output=True, text=True)
-
-    if result.returncode == 0 and result.stdout.strip():
-        # Get the first tag from the date-sorted list
-        return result.stdout.strip().split("\n")[0]
-    else:
+    """Return the latest tag of a remote Git repository without cloning."""
+    command = f"git ls-remote --tags --sort='-v:refname' {repo_path} | head -n 1 | sed 's/.*refs\\/tags\\///' | sed 's/\\^{{}}//' | grep -v '{{}}'  | sed -e 's/\\^{{}}//g'"
+    try:
+        result = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
+        if result.stdout.strip():
+            return result.stdout.strip()
+        else:
+            return ""
+    except subprocess.CalledProcessError:
         return ""
 
 
@@ -189,6 +190,7 @@ def main():
     args = parser.parse_args()
     creation_config = read_creation_config()
     latest_tag = get_latest_tag(creation_config["sdkUri"])
+    print(f"Latest tag: {latest_tag}")
 
     clone_sdk(
         creation_config["sdkUri"],
