@@ -70,7 +70,7 @@ def clone_sdk(sdk_url: str, sdk_version: str, sdk_temp_dir: str) -> None:
             sdk_version,
             sdk_temp_dir,
         )
-        print(f"SDK cloned successfully!")
+        print("SDK cloned successfully!")
     except subprocess.CalledProcessError as e:
         print(f"Error cloning repository: {e}")
 
@@ -115,7 +115,8 @@ def copy_project(source_path: str, destination_repo: str) -> None:
 
 
 def sanitize_name(name: str) -> str:
-    return re.sub(r'[^a-zA-Z0-9_]', '', name)
+    return re.sub(r"[^a-zA-Z0-9_]", "", name)
+
 
 def replace_app_name(creation_name: str, destination_repo: str) -> None:
     creation_name = sanitize_name(creation_name)
@@ -150,6 +151,18 @@ def compile_requirements(destination_repo: str) -> None:
     )
 
 
+def get_latest_tag(repo_path: str) -> str:
+    """Return the latest tag based on commit date."""
+    command = f"git -C {repo_path} tag --sort=-creatordate"
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+
+    if result.returncode == 0 and result.stdout.strip():
+        # Get the first tag from the date-sorted list
+        return result.stdout.strip().split("\n")[0]
+    else:
+        return ""
+
+
 def main():
     parser = argparse.ArgumentParser("run")
     parser.add_argument(
@@ -175,10 +188,11 @@ def main():
     )
     args = parser.parse_args()
     creation_config = read_creation_config()
+    latest_tag = get_latest_tag(creation_config["sdkUri"])
 
     clone_sdk(
         creation_config["sdkUri"],
-        creation_config["sdkVersion"],
+        latest_tag if latest_tag != "" else creation_config["sdkVersion"],
         get_project_creation_sdk_temp(),
     )
 
