@@ -153,9 +153,15 @@ def compile_requirements(destination_repo: str) -> None:
 
 def get_latest_tag(repo_path: str) -> str:
     """Return the latest tag of a remote Git repository without cloning."""
-    command = f"git ls-remote --tags --sort='-v:refname' {repo_path} | head -n 1 | sed 's/.*refs\\/tags\\///' | sed 's/\\^{{}}//' | grep -v '{{}}'  | sed -e 's/\\^{{}}//g'"
+    command = f"git ls-remote --tags --sort='-v:refname' {repo_path} | \
+        head -n 1 | \
+        sed 's/.*refs\\/tags\\///' | \
+        sed 's/\\^{{}}//' | \
+        grep -v '{{}}' | \
+        sed -e 's/\\^{{}}//g'"
     try:
-        result = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
+        result = subprocess.run(command, shell=True,
+                                capture_output=True, text=True, check=True)
         if result.stdout.strip():
             return result.stdout.strip()
         else:
@@ -200,7 +206,8 @@ def main():
 
     copy_files(creation_config["files"], args.destination)
 
-    examples_directory_path = os.path.join(get_project_creation_sdk_temp(), "examples")
+    examples_directory_path = os.path.join(
+        get_project_creation_sdk_temp(), "examples")
     example_app = (
         os.path.join(examples_directory_path, args.example)
         if args.example
