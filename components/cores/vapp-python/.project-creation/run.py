@@ -200,7 +200,7 @@ def main():
 
     clone_sdk(
         creation_config["sdkUri"],
-        latest_tag if latest_tag != "" else creation_config["sdkVersion"],
+        latest_tag or creation_config["sdkVersion"],
         get_project_creation_sdk_temp(),
     )
 
