@@ -70,7 +70,7 @@ def clone_sdk(sdk_url: str, sdk_version: str, sdk_temp_dir: str) -> None:
             sdk_version,
             sdk_temp_dir,
         )
-        print(f"SDK cloned successfully!")
+        print("SDK cloned successfully!")
     except subprocess.CalledProcessError as e:
         print(f"Error cloning repository: {e}")
 
@@ -115,7 +115,8 @@ def copy_project(source_path: str, destination_repo: str) -> None:
 
 
 def sanitize_name(name: str) -> str:
-    return re.sub(r'[^a-zA-Z0-9_]', '', name)
+    return re.sub(r"[^a-zA-Z0-9_]", "", name)
+
 
 def replace_app_name(creation_name: str, destination_repo: str) -> None:
     creation_name = sanitize_name(creation_name)
@@ -150,6 +151,25 @@ def compile_requirements(destination_repo: str) -> None:
     )
 
 
+def get_latest_tag(repo_path: str) -> str:
+    """Return the latest tag of a remote Git repository without cloning."""
+    command = f"git ls-remote --tags --sort='-v:refname' {repo_path} | \
+        head -n 1 | \
+        sed 's/.*refs\\/tags\\///' | \
+        sed 's/\\^{{}}//' | \
+        grep -v '{{}}' | \
+        sed -e 's/\\^{{}}//g'"
+    try:
+        result = subprocess.run(command, shell=True,
+                                capture_output=True, text=True, check=True)
+        if result.stdout.strip():
+            return result.stdout.strip()
+        else:
+            return ""
+    except subprocess.CalledProcessError:
+        return ""
+
+
 def main():
     parser = argparse.ArgumentParser("run")
     parser.add_argument(
@@ -175,16 +195,19 @@ def main():
     )
     args = parser.parse_args()
     creation_config = read_creation_config()
+    latest_tag = get_latest_tag(creation_config["sdkUri"])
+    print(f"Latest tag: {latest_tag}")
 
     clone_sdk(
         creation_config["sdkUri"],
-        creation_config["sdkVersion"],
+        latest_tag or creation_config["sdkVersion"],
         get_project_creation_sdk_temp(),
     )
 
     copy_files(creation_config["files"], args.destination)
 
-    examples_directory_path = os.path.join(get_project_creation_sdk_temp(), "examples")
+    examples_directory_path = os.path.join(
+        get_project_creation_sdk_temp(), "examples")
     example_app = (
         os.path.join(examples_directory_path, args.example)
         if args.example
