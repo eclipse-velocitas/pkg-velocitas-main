@@ -35,10 +35,10 @@ def clean_up_sdk_temp() -> None:
 
 def verbose_copy(src, dst) -> object:
     print(f"Copying {src!r} to {dst!r}")
-    dst_file = os.path.join(dst, os.path.basename(src))
-    if os.path.exists(dst_file):
+    dst_file = dst if os.path.isfile(dst) else os.path.join(dst, os.path.basename(src))
+    if os.path.lexists(dst_file):
         print(f"Destination {dst_file!r} already exists. Overwriting.")
-        if os.path.isdir(dst_file):
+        if os.path.isdir(dst_file) and not os.path.islink(dst_file):
             shutil.rmtree(dst_file)
         else:
             os.remove(dst_file)
