@@ -35,7 +35,7 @@ def clean_up_sdk_temp() -> None:
 
 def verbose_copy(src, dst) -> object:
     print(f"Copying {src!r} to {dst!r}")
-    return shutil.copy2(src, dst)
+    return shutil.copy(src, dst)
 
 
 def read_creation_config() -> dict:
