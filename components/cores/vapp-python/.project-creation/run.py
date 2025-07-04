@@ -35,13 +35,14 @@ def clean_up_sdk_temp() -> None:
 
 def verbose_copy(src, dst) -> object:
     print(f"Copying {src!r} to {dst!r}")
-    if os.path.exists(dst):
-        print(f"Destination {dst!r} already exists. Overwriting.")
-        if os.path.isdir(dst):
-            shutil.rmtree(dst)
+    dst_file = os.path.join(dst, os.path.basename(src))
+    if os.path.exists(dst_file):
+        print(f"Destination {dst_file!r} already exists. Overwriting.")
+        if os.path.isdir(dst_file):
+            shutil.rmtree(dst_file)
         else:
-            os.remove(dst)
-    return shutil.copy2(src, dst)
+            os.remove(dst_file)
+    return shutil.copy(src, dst)
 
 
 def read_creation_config() -> dict:
