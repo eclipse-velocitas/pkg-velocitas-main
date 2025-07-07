@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Contributors to the Eclipse Foundation
+# Copyright (c) 2023-2025 Contributors to the Eclipse Foundation
 #
 # This program and the accompanying materials are made available under the
 # terms of the Apache License, Version 2.0 which is available at
@@ -35,7 +35,14 @@ def clean_up_sdk_temp() -> None:
 
 def verbose_copy(src, dst) -> object:
     print(f"Copying {src!r} to {dst!r}")
-    return shutil.copy2(src, dst)
+    dst_path = dst if os.path.isfile(dst) else os.path.join(dst, os.path.basename(src))
+    if os.path.lexists(dst_path):
+        print(f"Destination {dst_path!r} already exists. Overwriting.")
+        if os.path.isdir(dst_path) and not os.path.islink(dst_path):
+            shutil.rmtree(dst_path)
+        else:
+            os.remove(dst_path)
+    return shutil.copy(src, dst)
 
 
 def read_creation_config() -> dict:
